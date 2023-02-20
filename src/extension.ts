@@ -1,6 +1,67 @@
 import * as vscode from 'vscode';
 
 
+
+function getBasicInfo(editor: vscode.TextEditor):
+[
+    variableName: string,
+    typeName: string,
+    foundLine: number,
+    foundCharacterBegin: number,
+    foundCharacterEnd: number
+] {
+    // Get cursor position
+    let cursorPosition = editor.selection.start;
+
+    // Find out where this word starts
+    const variable = editor.document.getWordRangeAtPosition(cursorPosition);
+    const variableStartCharacter = variable?.start.character || 0;
+
+    // What line is it at?
+    var line = cursorPosition.line;
+
+    // console.log("start char:",variableStartCharacter);
+    // console.log("end char:", variableEndCharacter);
+
+    // Now get the name of the variable
+    const variablePosition = new vscode.Position(line, variableStartCharacter);
+    const variableNameRange = editor.document.getWordRangeAtPosition(variablePosition);
+    const variableName = editor.document.getText(variableNameRange);
+    // console.log("var name:" + variableName);
+
+    // Now get the type of the variable TODO: find previous word no matter what
+    const typePosition = new vscode.Position(line, variableStartCharacter - 1);
+    const typeRange = editor.document.getWordRangeAtPosition(typePosition);
+    const typeName = editor.document.getText(typeRange);
+    const typeStartPosition = typeRange?.start || 0;
+    // console.log("var type:" + typeName);
+
+    // Now try to find where this scope ends
+    var foundLine = 0;
+    var foundCharacterBegin = 0;
+    var foundCharacterEnd = 0;
+
+    for (var i = line; i <= editor.document.lineCount; i++) {
+        const line = editor.document.lineAt(i);
+        const lineCharacterStartPosition = line.firstNonWhitespaceCharacterIndex;
+        const lineCharacterEndPosition = line.range.end.character;
+        const lineString = line.text;
+
+        console.log(lineString);
+
+        // Can only assume that } is the end of the scope :T
+        if (lineString === "}") {
+            foundLine = line.lineNumber - 1;
+            break;
+        } else if (lineCharacterEndPosition > 0 && lineCharacterStartPosition !== typeStartPosition) {
+            foundCharacterBegin = lineCharacterStartPosition;
+            foundCharacterEnd = lineCharacterEndPosition;
+        }
+    }
+
+    return [variableName, typeName, foundLine, foundCharacterBegin, foundCharacterEnd];
+}
+
 export function activate(context: vscode.ExtensionContext) {
 
     let gettersAndSetters = vscode.commands.registerCommand("d-boilerplate.addGettersSetters", (args) => {
@@ -9,53 +70,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         if(editor) {
 
-            // Get cursor position
-            let cursorPosition = editor.selection.start;
-
-            // Find out where this word starts
-            const variable = editor.document.getWordRangeAtPosition(cursorPosition);
-            const variableStartCharacter = variable?.start.character || 0;
-
-            // What line is it at?
-            var line = cursorPosition.line;
-
-            // console.log("start char:",variableStartCharacter);
-            // console.log("end char:", variableEndCharacter);
-
-            // Now get the name of the variable
-            const variablePosition = new vscode.Position(line, variableStartCharacter);
-            const variableNameRange = editor.document.getWordRangeAtPosition(variablePosition);
-            const variableName = editor.document.getText(variableNameRange);
-            // console.log("var name:" + variableName);
-
-            // Now get the type of the variable TODO: find previous word no matter what
-            const typePosition = new vscode.Position(line, variableStartCharacter - 1);
-            const typeRange = editor.document.getWordRangeAtPosition(typePosition);
-            const typeName = editor.document.getText(typeRange);
-            // console.log("var type:" + typeName);
-
-            // Now try to find where this scope ends
-            var foundLine = 0;
-            var foundCharacterBegin = 0;
-            var foundCharacterEnd = 0;
-
-            for (var i = line; i <= editor.document.lineCount; i++) {
-                const line = editor.document.lineAt(i);
-                const lineCharacterStartPosition = line.firstNonWhitespaceCharacterIndex;
-                const lineCharacterEndPosition = line.range.end.character;
-                const lineString = line.text;
-
-                console.log(lineString);
-
-                // Can only assume that } is the end of the scope :T
-                if (lineString === "}") {
-                    break;
-                } else if (lineCharacterEndPosition > 0) {
-                    foundLine = i;
-                    foundCharacterBegin = lineCharacterStartPosition;
-                    foundCharacterEnd = lineCharacterEndPosition;
-                }
-            }
+            const [variableName, typeName, foundLine, foundCharacterBegin, foundCharacterEnd] = getBasicInfo(editor);
 
             
             const insertionPosition = new vscode.Position(foundLine, foundCharacterEnd);
@@ -66,11 +81,25 @@ export function activate(context: vscode.ExtensionContext) {
                 whitespace += " ";
             }
 
+            var buildString = "";
+
+            {
+                // Getter
+                buildString = "\n\n" +
+                whitespace + "public " + typeName + " " + "get" + variableName.charAt(0).toUpperCase() + variableName.slice(1) + "() {\n" +
+                whitespace + "    " + "return this." + variableName + ";\n" +
+                whitespace + "}\n" +
+
+                // Setter
+                "\n\n" +
+                whitespace + "public " + typeName + " " + "set" + variableName.charAt(0).toUpperCase() + variableName.slice(1) + "(" + typeName + " " + variableName + ") {\n" +
+                whitespace + "    " + "this." + variableName + " = " + variableName + ";\n" +
+                whitespace + "}\n";
+            }
+
+            // Probably needs to know if tabs or spaces
             editor.edit( editBuilder => {
-                editBuilder.insert(
-                    insertionPosition, "\n" +
-                    "public " + typeName + " " + "get" + variableName.charAt(0).toUpperCase() + variableName.slice(1)
-                );
+                editBuilder.insert( insertionPosition, buildString);
             });
 
 
