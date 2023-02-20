@@ -32,7 +32,6 @@
                 "command": "d-boilerplate.addGettersSetters",
                 "group": "navigation"
             }
-            
         ]
     }
   },
