@@ -31,16 +31,6 @@
                 "when": "resourceLangId == d",
                 "command": "d-boilerplate.addGettersSetters",
                 "group": "navigation"
-            },
-            {
-                "when": "resourceLangId == d",
-                "command": "d-boilerplate.getters",
-                "group": "navigation"
-            },
-            {
-                "when": "resourceLangId == d",
-                "command": "d-boilerplate.setters",
-                "group": "navigation"
             }
             
         ]
