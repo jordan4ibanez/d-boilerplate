@@ -36,16 +36,44 @@ export function activate(context: vscode.ExtensionContext) {
 
             // Now try to find where this scope ends
             var foundLine = 0;
-            for (var i = line + 1; i <= editor.document.lineCount; i++) {
-                foundLine = i;
-                const lineString = editor.document.lineAt(foundLine).text;
+            var foundCharacterBegin = 0;
+            var foundCharacterEnd = 0;
+
+            for (var i = line; i <= editor.document.lineCount; i++) {
+                const line = editor.document.lineAt(i);
+                const lineCharacterStartPosition = line.firstNonWhitespaceCharacterIndex;
+                const lineCharacterEndPosition = line.range.end.character;
+                const lineString = line.text;
+
+                console.log(lineString);
+
                 // Can only assume that } is the end of the scope :T
                 if (lineString === "}") {
                     break;
+                } else if (lineCharacterEndPosition > 0) {
+                    foundLine = i;
+                    foundCharacterBegin = lineCharacterStartPosition;
+                    foundCharacterEnd = lineCharacterEndPosition;
                 }
             }
 
             
+            const insertionPosition = new vscode.Position(foundLine, foundCharacterEnd);
+
+            // Generate white space to match scope
+            var whitespace = "";
+            for (var i = 0; i < foundCharacterBegin; i++) {
+                whitespace += " ";
+            }
+
+            editor.edit( editBuilder => {
+                editBuilder.insert(
+                    insertionPosition, "\n" +
+                    "public " + typeName + " " + "get" + variableName.charAt(0).toUpperCase() + variableName.slice(1)
+                );
+            });
+
+
 
 
         }
