@@ -73,7 +73,7 @@ function appendGetter(buildString: string, whitespace: string, variableName: str
 function appendSetter(buildString: string, whitespace: string, variableName: string, typeName: string) {
     // Setter
     return buildString += "\n" +
-    whitespace + "public " + typeName + " " + "set" + variableName.charAt(0).toUpperCase() + variableName.slice(1) + "(" + typeName + " " + variableName + ") {\n" +
+    whitespace + "public void " + "set" + variableName.charAt(0).toUpperCase() + variableName.slice(1) + "(" + typeName + " " + variableName + ") {\n" +
     whitespace + "    " + "this." + variableName + " = " + variableName + ";\n" +
     whitespace + "}\n";
 }
