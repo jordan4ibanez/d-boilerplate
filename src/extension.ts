@@ -62,6 +62,30 @@ function getBasicInfo(editor: vscode.TextEditor):
     return [variableName, typeName, foundLine, foundCharacterBegin, foundCharacterEnd];
 }
 
+function appendGetter(buildString: string, whitespace: string, variableName: string, typeName: string) {
+    // Getter
+    return buildString += "\n" +
+    whitespace + "public " + typeName + " " + "get" + variableName.charAt(0).toUpperCase() + variableName.slice(1) + "() {\n" +
+    whitespace + "    " + "return this." + variableName + ";\n" +
+    whitespace + "}\n";
+}
+function appendSetter(buildString: string, whitespace: string, variableName: string, typeName: string) {
+    // Setter
+    return buildString += "\n" +
+    whitespace + "public " + typeName + " " + "set" + variableName.charAt(0).toUpperCase() + variableName.slice(1) + "(" + typeName + " " + variableName + ") {\n" +
+    whitespace + "    " + "this." + variableName + " = " + variableName + ";\n" +
+    whitespace + "}\n";
+}
+
+function generateWhiteSpace(foundCharacterBegin: number) {
+    // Generate white space to match scope
+    var whitespace = "";
+    for (var i = 0; i < foundCharacterBegin; i++) {
+        whitespace += " ";
+    }
+    return whitespace;
+}
+
 export function activate(context: vscode.ExtensionContext) {
 
     let gettersAndSetters = vscode.commands.registerCommand("d-boilerplate.addGettersSetters", (args) => {
@@ -75,27 +99,13 @@ export function activate(context: vscode.ExtensionContext) {
             
             const insertionPosition = new vscode.Position(foundLine, foundCharacterEnd);
 
-            // Generate white space to match scope
-            var whitespace = "";
-            for (var i = 0; i < foundCharacterBegin; i++) {
-                whitespace += " ";
-            }
+            
+            var whiteSpace = generateWhiteSpace(foundCharacterBegin);
 
-            var buildString = "";
+            var buildString = "\n";
 
-            {
-                // Getter
-                buildString = "\n\n" +
-                whitespace + "public " + typeName + " " + "get" + variableName.charAt(0).toUpperCase() + variableName.slice(1) + "() {\n" +
-                whitespace + "    " + "return this." + variableName + ";\n" +
-                whitespace + "}\n" +
-
-                // Setter
-                "\n\n" +
-                whitespace + "public " + typeName + " " + "set" + variableName.charAt(0).toUpperCase() + variableName.slice(1) + "(" + typeName + " " + variableName + ") {\n" +
-                whitespace + "    " + "this." + variableName + " = " + variableName + ";\n" +
-                whitespace + "}\n";
-            }
+            buildString = appendGetter(buildString, whiteSpace, variableName, typeName);
+            buildString = appendSetter(buildString, whiteSpace, variableName, typeName);
 
             // Probably needs to know if tabs or spaces
             editor.edit( editBuilder => {
