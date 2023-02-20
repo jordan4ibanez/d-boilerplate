@@ -17,11 +17,11 @@
         "title": "Add Getters and Setters"
       },
       {
-        "command": "d-boilerplate.getters",
+        "command": "d-boilerplate.addGetters",
         "title": "Add Getters"
       },
       {
-        "command": "d-boilerplate.setters",
+        "command": "d-boilerplate.addSetters",
         "title": "Add Setters"
       }
     ],
@@ -30,6 +30,16 @@
             {
                 "when": "resourceLangId == d",
                 "command": "d-boilerplate.addGettersSetters",
+                "group": "navigation"
+            },
+            {
+                "when": "resourceLangId == d",
+                "command": "d-boilerplate.addGetters",
+                "group": "navigation"
+            },
+            {
+                "when": "resourceLangId == d",
+                "command": "d-boilerplate.addSetters",
                 "group": "navigation"
             }
         ]

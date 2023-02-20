@@ -62,6 +62,7 @@ function getBasicInfo(editor: vscode.TextEditor):
     return [variableName, typeName, foundLine, foundCharacterBegin, foundCharacterEnd];
 }
 
+//! Probably needs to know if tabs or spaces
 function appendGetter(buildString: string, whitespace: string, variableName: string, typeName: string) {
     // Getter
     return buildString += "\n" +
@@ -88,37 +89,51 @@ function generateWhiteSpace(foundCharacterBegin: number) {
 
 export function activate(context: vscode.ExtensionContext) {
 
-    let gettersAndSetters = vscode.commands.registerCommand("d-boilerplate.addGettersSetters", (args) => {
-        console.log("doing that fancy boi :)");
+    let gettersAndSetters = vscode.commands.registerCommand("d-boilerplate.addGettersSetters", () => {
         const editor = vscode.window.activeTextEditor;
-
         if(editor) {
-
             const [variableName, typeName, foundLine, foundCharacterBegin, foundCharacterEnd] = getBasicInfo(editor);
-
-            
             const insertionPosition = new vscode.Position(foundLine, foundCharacterEnd);
-
-            
             var whiteSpace = generateWhiteSpace(foundCharacterBegin);
-
             var buildString = "\n";
-
             buildString = appendGetter(buildString, whiteSpace, variableName, typeName);
             buildString = appendSetter(buildString, whiteSpace, variableName, typeName);
-
-            // Probably needs to know if tabs or spaces
             editor.edit( editBuilder => {
                 editBuilder.insert( insertionPosition, buildString);
             });
-
-
-
-
         }
     });
-
     context.subscriptions.push(gettersAndSetters);
+
+    let getters = vscode.commands.registerCommand("d-boilerplate.addGetters", () => {
+        const editor = vscode.window.activeTextEditor;
+        if(editor) {
+            const [variableName, typeName, foundLine, foundCharacterBegin, foundCharacterEnd] = getBasicInfo(editor);
+            const insertionPosition = new vscode.Position(foundLine, foundCharacterEnd);
+            var whiteSpace = generateWhiteSpace(foundCharacterBegin);
+            var buildString = "\n";
+            buildString = appendGetter(buildString, whiteSpace, variableName, typeName);
+            editor.edit( editBuilder => {
+                editBuilder.insert( insertionPosition, buildString);
+            });
+        }
+    });
+    context.subscriptions.push(getters);
+
+    let setters = vscode.commands.registerCommand("d-boilerplate.addSetters", () => {
+        const editor = vscode.window.activeTextEditor;
+        if(editor) {
+            const [variableName, typeName, foundLine, foundCharacterBegin, foundCharacterEnd] = getBasicInfo(editor);
+            const insertionPosition = new vscode.Position(foundLine, foundCharacterEnd);
+            var whiteSpace = generateWhiteSpace(foundCharacterBegin);
+            var buildString = "\n";
+            buildString = appendSetter(buildString, whiteSpace, variableName, typeName);
+            editor.edit( editBuilder => {
+                editBuilder.insert( insertionPosition, buildString);
+            });
+        }
+    });
+    context.subscriptions.push(setters);
 
 
 }
