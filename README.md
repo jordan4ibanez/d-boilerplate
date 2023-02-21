@@ -17,6 +17,10 @@ Type definitions on a different line doesn't work.
 
 ## Release Notes
 
+### 1.0.1 1/2
+
+Edited this text into the readme.
+
 ### 1.0.0
 
 Initial release.
