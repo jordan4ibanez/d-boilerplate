@@ -1,5 +1,7 @@
 # d-boilerplate README
 
+Discord link: https://discord.gg/dRPyvubfyg
+
 ## Features
 
 Let's you quickly add getters and setters to your classes in D.
